@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QTcpSocket>
 
 class DataReceiver : public QThread
 {
@@ -16,11 +17,19 @@ protected:
 private:
     bool flag = 0;
 
+    QTcpSocket *m_socket;
+    void doConnect();
+
 signals:
     void dataReady(const double key, const double temp);
 
 public slots:
     void produceData();
+
+    void connected();
+    void disconnected();
+    void bytesWritten(qint64 bytes);
+    void readyRead();
 };
 
 #endif // DATARECEIVER_H

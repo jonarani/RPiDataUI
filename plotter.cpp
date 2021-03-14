@@ -31,14 +31,14 @@ void Plotter::updateGraph(const double key, const double y)
 {
     static double lastPointKey = 0;
 
-    if(key - lastPointKey > 0.002)
+    if(key - lastPointKey > 0.002) // Is this check necessary
     {
         m_plot->graph(0)->addData(key, qSin(key)+qrand()/(double)RAND_MAX*1*qSin(key/0.3843));
         lastPointKey = key;
     }
 
     m_plot->graph(0)->rescaleValueAxis();
-    if(key >= 7)
+    if(key >= TIME_RANGE)
         m_plot->xAxis->setRange(key, TIME_RANGE, Qt::AlignRight);
     else
         m_plot->xAxis->setRange(START_TIME, TIME_RANGE);
