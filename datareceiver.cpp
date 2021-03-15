@@ -2,8 +2,8 @@
 #include <QTime>
 #include <QAbstractSocket>
 
-#define RPI_IP_ADDR "192.168.1.157"
-#define PORT_NUM 50000
+QString RPI_IP_ADDR = "192.168.1.157";
+quint16 PORT_NUM = 47777;
 
 static bool isConnected;
 
@@ -14,31 +14,42 @@ DataReceiver::DataReceiver(QObject *parent) : QThread(parent)
 
 void DataReceiver::run()
 {
-    double y = 15;
+    double temp = 20;
+    double hum = 40;
+    QByteArray receivedData;
 
     doConnect();
+    sleep(1);
     qDebug() << isConnected;
+
+    m_socket->write("So it begins!\r\n");
+    m_socket->waitForBytesWritten(1000);
 
     while(isConnected)
     {
         // TODO: Conditional variable or mutex so that thread could go to sleep and not waste any CPU time
         //       TCPSocket for incoming data
-        if(flag)
+        if(true) // flag
         {
             // qint64 ret = m_socket->write("Data", qstrlen("Data"));
             // qDebug() << ret;
+            if(m_socket->waitForReadyRead(3000))
+            {
+                // qDebug() << "Bytes read: " << m_socket->bytesAvailable();
+                receivedData = m_socket->readAll();
+                qDebug() << receivedData;
+                auto dataList = receivedData.split('|');
+                temp = dataList.first().toDouble();
+                hum = dataList.back().toDouble();
 
-            static QTime time(QTime::currentTime());
-            double key = time.elapsed() / 1000.0;
-            flag = 0;
+                static QTime time(QTime::currentTime());
+                double key = time.elapsed() / 1000.0;
+                flag = 0;
 
-            if(y >= 50)
-                y = -20;
-            else
-                y++;
-
-            emit dataReady(key, y);
+                emit dataReady(key, temp, hum);
+            }
         }
+        sleep(1);
     }
 }
 
@@ -51,10 +62,10 @@ void DataReceiver::doConnect()
 {
     m_socket = new QTcpSocket();
 
-    connect(m_socket, &QTcpSocket::connected, this, &DataReceiver::connected);
+    connect(m_socket, SIGNAL(connected()), this, SLOT(connected()));
     connect(m_socket, &QTcpSocket::disconnected, this, &DataReceiver::disconnected);
     connect(m_socket, &QTcpSocket::bytesWritten, this, &DataReceiver::bytesWritten);
-    connect(m_socket, &QTcpSocket::readyRead, this, &DataReceiver::readyRead);
+    connect(m_socket, &QIODevice::readyRead, this, &DataReceiver::readyRead);
 
     qDebug() << "connecting...";
 
@@ -64,14 +75,11 @@ void DataReceiver::doConnect()
     {
         qDebug() << "Error: " << m_socket->errorString();
     }
-    else
-    {
-        isConnected = true;
-    }
 }
 
 void DataReceiver::connected()
 {
+    isConnected = true;
     qDebug() << "connected...";
 }
 
@@ -87,7 +95,7 @@ void DataReceiver::bytesWritten(qint64 bytes)
 
 void DataReceiver::readyRead()
 {
-    qDebug() << "reading...";
+    // qDebug() << "reading...";
 
-    qDebug() << m_socket->readAll();
+    // qDebug() << m_socket->readAll();
 }

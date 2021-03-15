@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timer, &QTimer::timeout, m_pReceiverThread, &DataReceiver::produceData);
 
     m_pReceiverThread->start();
-    timer->start(50);
+    // timer->start(50);
 }
 
 MainWindow::~MainWindow()

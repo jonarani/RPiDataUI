@@ -21,7 +21,7 @@ private:
     void doConnect();
 
 signals:
-    void dataReady(const double key, const double temp);
+    void dataReady(const double key, const double temp, const double hum);
 
 public slots:
     void produceData();

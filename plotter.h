@@ -17,7 +17,7 @@ private:
     QCustomPlot* m_plot;
 
 public slots:
-    void updateGraph(const double key, const double temp);
+    void updateGraph(const double key, const double temp, const double hum);
 signals:
 
 };
