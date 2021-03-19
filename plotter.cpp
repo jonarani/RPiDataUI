@@ -17,7 +17,7 @@ void Plotter::setupRealTimeGraph()
     m_plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);   // Circles on data points
 
     m_plot->addGraph();
-    m_plot->graph(1)->setScatterStyle(QCPScatterStyle::ssCircle);   // Circles on data points
+    m_plot->graph(1)->setScatterStyle(QCPScatterStyle::ssCircle);
     m_plot->graph(1)->setPen(QPen(QColor(255, 50, 20)));
 
     m_plot->xAxis->setLabel("Time (s)");
@@ -36,14 +36,9 @@ void Plotter::setupRealTimeGraph()
 // SLOT
 void Plotter::updateGraph(const double key, const double temp, const double hum)
 {
-    static double lastPointKey = 0;
 
-    if(key - lastPointKey > 0.002) // Is this check necessary
-    {
-        m_plot->graph(0)->addData(key, temp);
-        m_plot->graph(1)->addData(key, hum);
-        lastPointKey = key;
-    }
+    m_plot->graph(0)->addData(key, temp);
+    m_plot->graph(1)->addData(key, hum);
 
     // m_plot->graph(0)->rescaleValueAxis();
     if(key >= TIME_RANGE)

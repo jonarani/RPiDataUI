@@ -9,7 +9,6 @@ static bool isConnected;
 
 DataReceiver::DataReceiver(QObject *parent) : QThread(parent)
 {
-
 }
 
 void DataReceiver::run()
@@ -22,40 +21,22 @@ void DataReceiver::run()
     sleep(1);
     qDebug() << isConnected;
 
-    m_socket->write("So it begins!\r\n");
-    m_socket->waitForBytesWritten(1000);
-
     while(isConnected)
     {
-        // TODO: Conditional variable or mutex so that thread could go to sleep and not waste any CPU time
-        //       TCPSocket for incoming data
-        if(true) // flag
+        if(m_socket->waitForReadyRead())
         {
-            // qint64 ret = m_socket->write("Data", qstrlen("Data"));
-            // qDebug() << ret;
-            if(m_socket->waitForReadyRead(3000))
-            {
-                // qDebug() << "Bytes read: " << m_socket->bytesAvailable();
-                receivedData = m_socket->readAll();
-                qDebug() << receivedData;
-                auto dataList = receivedData.split('|');
-                temp = dataList.first().toDouble();
-                hum = dataList.back().toDouble();
+            receivedData = m_socket->readAll();
+            qDebug() << receivedData;
+            auto dataList = receivedData.split('|');
+            temp = dataList.first().toDouble();
+            hum = dataList.back().toDouble();
 
-                static QTime time(QTime::currentTime());
-                double key = time.elapsed() / 1000.0;
-                flag = 0;
+            static QTime time(QTime::currentTime());
+            double key = time.elapsed() / 1000.0;
 
-                emit dataReady(key, temp, hum);
-            }
+            emit dataReady(key, temp, hum);
         }
-        sleep(1);
     }
-}
-
-void DataReceiver::produceData()
-{
-    flag = 1;
 }
 
 void DataReceiver::doConnect()
@@ -85,6 +66,7 @@ void DataReceiver::connected()
 
 void DataReceiver::disconnected()
 {
+    isConnected = false;
     qDebug() << "disconnected...";
 }
 
@@ -95,7 +77,6 @@ void DataReceiver::bytesWritten(qint64 bytes)
 
 void DataReceiver::readyRead()
 {
-    // qDebug() << "reading...";
-
+    // qDebug() << "ready...";
     // qDebug() << m_socket->readAll();
 }
